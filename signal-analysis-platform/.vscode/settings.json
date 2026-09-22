@@ -1,0 +1,12 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\mouni\\anaconda3\\python.exe",
+  "python.pythonPath": "C:\\Users\\mouni\\anaconda3\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/signal_engine",
+    "${workspaceFolder}"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/signal_engine",
+    "${workspaceFolder}"
+  ]
+}
