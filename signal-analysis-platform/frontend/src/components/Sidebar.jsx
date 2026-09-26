@@ -9,7 +9,9 @@ import {
   FileText,
   Settings,
   HelpCircle,
-  Radio
+  Radio,
+  FileCheck,
+  BarChart2
 } from 'lucide-react';
 
 export const Sidebar = () => {
@@ -17,8 +19,9 @@ export const Sidebar = () => {
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/upload', label: 'Upload Signal', icon: Upload },
     { path: '/analyze', label: 'Analyze Signal', icon: Activity },
+    { path: '/ml-evaluation', label: 'ML Evaluation', icon: BarChart2 },
+    { path: '/param-validation', label: 'Parameter Validation', icon: FileCheck },
     { path: '/decode', label: 'Decode Signal', icon: Binary },
-    { path: '/bitstream', label: 'Bit Stream', icon: Cpu },
     { path: '/reports', label: 'Reports', icon: FileText },
   ];
 

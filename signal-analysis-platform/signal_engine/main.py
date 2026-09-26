@@ -170,6 +170,12 @@ def process_signal(req: ProcessRequest):
         # 6. Modulation Classification
         stage = "modulation_detection"
         classification = classify_modulation(sig_data, fs)
+
+        # Calculate Data Rate if possible
+        mod = classification.get("modulation", "")
+        bps_map = {"BPSK": 1, "QPSK": 2, "8PSK": 3, "16QAM": 4, "64QAM": 6, "PAM4": 2, "QAM16": 4, "QAM64": 6}
+        if params.get("symbol_rate_baud") is not None and mod in bps_map:
+            params["data_rate_bps"] = params["symbol_rate_baud"] * bps_map[mod]
         
         # 7. Demodulation
         stage = "demodulation"
@@ -287,6 +293,29 @@ def run_fec(req: FECRequest):
 @app.post("/correlate")
 def run_correlate(req: CorrelateRequest):
     return analyze_bitstream(req.bit_string, sync_pattern=req.sync_pattern)
+
+@app.get("/api/evaluation/ml")
+def get_ml_evaluation():
+    try:
+        metrics_path = os.path.join(BASE_DIR, "ml", "results", "final_metrics.json")
+        if os.path.exists(metrics_path):
+            with open(metrics_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return JSONResponse(status_code=404, content={"error": "final_metrics.json not found"})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.get("/api/evaluation/parameters")
+def get_param_evaluation():
+    try:
+        metrics_path = os.path.join(BASE_DIR, "ml", "results", "parameter_metrics.json")
+        if os.path.exists(metrics_path):
+            with open(metrics_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return JSONResponse(status_code=404, content={"error": "parameter_metrics.json not found"})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 
 @app.get("/report/{file_name}")
 def download_report(file_name: str, format: str = Query("json")):

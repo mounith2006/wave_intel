@@ -147,27 +147,25 @@ export const Reports = () => {
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Sampling Freq</span>
               <span className="font-bold text-slate-900">
-                {isNormalizedFreq ? 'Not provided' : formatSampleRate(meta.sample_rate)}
+                {params.sampling_frequency_hz ? `${params.sampling_frequency_hz.toLocaleString()} Hz` : 'Not available'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Center Frequency</span>
               <span className="font-bold text-slate-900">
-                {isNormalizedFreq
-                  ? `${(params.center_frequency || params.peak_frequency || 0) >= 0 ? '+' : ''}${(params.center_frequency || params.peak_frequency || 0).toFixed(4)} normalized`
-                  : formatFreq(params.center_frequency || params.peak_frequency)}
+                {params.center_frequency_hz !== null ? `${params.center_frequency_hz.toLocaleString()} Hz` : (params.center_frequency_normalized ? `${params.center_frequency_normalized} norm` : 'Not available')}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Bandwidth</span>
               <span className="font-bold text-slate-900">
-                {isNormalizedFreq ? `${params.occupied_bandwidth || 'N/A'}` : formatFreq(params.occupied_bandwidth)}
+                {params.bandwidth_hz !== null ? `${params.bandwidth_hz.toLocaleString()} Hz` : (params.bandwidth_normalized ? `${params.bandwidth_normalized} norm` : 'Not available')}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">SNR</span>
               <span className="font-bold text-blue-600">
-                {params.snr_display || (params.snr_db !== undefined ? `${params.snr_db} dB` : 'N/A')}
+                {params.snr_db !== null && params.snr_db !== undefined ? `${params.snr_db.toFixed(1)} dB` : 'Not available'}
               </span>
             </div>
             <div className="flex justify-between">
@@ -177,15 +175,13 @@ export const Reports = () => {
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Symbol Rate</span>
               <span className="text-slate-800">
-                {isCw
-                  ? 'Not available'
-                  : (params.symbol_rate_display || (params.symbol_rate !== null && params.symbol_rate !== undefined ? `${params.symbol_rate} Sym/s` : 'Not available'))}
+                {params.symbol_rate_baud !== null ? `${params.symbol_rate_baud.toLocaleString()} baud` : (params.symbol_rate_normalized ? `${params.symbol_rate_normalized} norm` : 'Not available')}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Data Rate</span>
               <span className="text-slate-800">
-                {isCw ? 'N/A' : (params.data_rate !== undefined ? `${params.data_rate} Mbps` : 'N/A')}
+                {params.data_rate_bps !== null && params.data_rate_bps !== undefined ? `${params.data_rate_bps.toLocaleString()} bps` : 'N/A'}
               </span>
             </div>
           </div>

@@ -67,7 +67,7 @@ def predict_modulation(iq_samples, sample_rate=None, model_dir="models"):
             scaler = artifact["scaler"]
             classes = artifact["classes"]
 
-            # Extract exact 46 features that the model was trained on
+            # Extract exact features that the model was trained on
             feats_vec = extract_iq_features(iq_samples, fs=sample_rate)
             feats_scaled = scaler.transform([feats_vec])
 

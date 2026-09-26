@@ -101,18 +101,22 @@ def estimate_signal_parameters(signal_data, fs):
         "signal_power_db": round(sig_power_db, 2),
         "noise_power_db": round(noise_power_db, 2),
         "snr_db": snr_db,
-        "raw_snr_db": raw_snr_db,
-        "snr_bounded": is_bounded,
-        "snr_display": f"> {MAX_MEASURABLE_SNR:.1f} dB (High SNR)" if is_bounded else f"{snr_db:.1f} dB",
-        "peak_frequency": round(peak_freq, freq_decimals),
-        "center_frequency": round(center_freq, freq_decimals),
+        "snr_source": "estimated",
+        "sampling_frequency_hz": fs_val if has_valid_fs else None,
+        "sampling_frequency_source": "file_metadata" if has_valid_fs else "unavailable",
+        "center_frequency_hz": round(center_freq, freq_decimals) if has_valid_fs else None,
+        "center_frequency_normalized": round(center_freq, 4) if not has_valid_fs else None,
+        "center_frequency_source": "estimated",
         "occupied_bandwidth": round(bandwidth, freq_decimals),
-        "symbol_rate": sym_res["symbol_rate"],
-        "symbol_rate_ksym_s": sym_res["symbol_rate_ksym_s"],
-        "symbol_rate_display": sym_res["symbol_rate_display"],
-        "symbol_rate_confidence": sym_res["confidence"],
-        "sps": sym_res["sps"],
-        "is_normalized_freq": not has_valid_fs
+        "bandwidth_hz": round(bandwidth, freq_decimals) if has_valid_fs else None,
+        "bandwidth_normalized": round(bandwidth, 4) if not has_valid_fs else None,
+        "symbol_rate_baud": sym_res["symbol_rate"] if has_valid_fs and sym_res["symbol_rate"] is not None else None,
+        "symbol_rate_normalized": sym_res["symbol_rate"] if not has_valid_fs and sym_res["symbol_rate"] is not None else None,
+        "symbol_rate_source": "estimated" if sym_res["symbol_rate"] is not None else "unavailable",
+        "ground_truth_available": False,
+        "is_normalized_freq": not has_valid_fs,
+        "data_rate_bps": None,
+        "peak_frequency": round(peak_freq, freq_decimals)
     }
 
 

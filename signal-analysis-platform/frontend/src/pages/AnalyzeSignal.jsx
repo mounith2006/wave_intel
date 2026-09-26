@@ -124,8 +124,11 @@ export const AnalyzeSignal = () => {
               </span>
             </span>
             <span className="font-bold text-slate-900 text-sm">
-              {formatSampleRate(meta.sample_rate)}
+              {params.sampling_frequency_hz ? `${params.sampling_frequency_hz.toLocaleString()} Hz` : 'Not available'}
             </span>
+            {params.sampling_frequency_source && (
+              <span className="block text-[10px] text-slate-400 mt-0.5">Source: {params.sampling_frequency_source.replace('_', ' ')}</span>
+            )}
           </div>
 
           <div>
@@ -143,41 +146,53 @@ export const AnalyzeSignal = () => {
           <div>
             <span className="text-slate-400 font-sans block font-medium">Center Frequency</span>
             <span className="font-bold text-slate-900 text-sm">
-              {isNormalizedFreq
-                ? `${(params.center_frequency || params.peak_frequency || 0) >= 0 ? '+' : ''}${(params.center_frequency || params.peak_frequency || 0).toFixed(4)} normalized`
-                : formatFreq(params.center_frequency || params.peak_frequency)}
+              {params.center_frequency_hz !== null ? `${params.center_frequency_hz.toLocaleString()} Hz` : 'Not available'}
             </span>
+            {params.center_frequency_hz === null && params.center_frequency_normalized !== null && (
+              <span className="block text-[10px] text-slate-500 mt-0.5">Normalized: {params.center_frequency_normalized}</span>
+            )}
+            {params.center_frequency_hz !== null && <span className="block text-[10px] text-slate-400 mt-0.5">Source: Estimated</span>}
           </div>
 
           <div>
             <span className="text-slate-400 font-sans block font-medium">Symbol Rate</span>
             <span className="font-bold text-slate-900 text-sm">
-              {cls.cw_detected || String(cls.modulation || "").toUpperCase().includes("CW")
-                ? "Not available"
-                : (params.symbol_rate_display || (params.symbol_rate !== null && params.symbol_rate !== undefined ? `${params.symbol_rate} Sym/s` : 'Not available'))}
+              {params.symbol_rate_baud !== null ? `${params.symbol_rate_baud.toLocaleString()} baud` : 'Not available'}
             </span>
+            {params.symbol_rate_baud === null && params.symbol_rate_normalized !== null && (
+              <span className="block text-[10px] text-slate-500 mt-0.5">Normalized: {params.symbol_rate_normalized}</span>
+            )}
+            {params.symbol_rate_baud !== null && <span className="block text-[10px] text-slate-400 mt-0.5">Source: Estimated</span>}
           </div>
 
           {/* Row 2 */}
           <div>
             <span className="text-slate-400 font-sans block font-medium">Bandwidth</span>
             <span className="font-bold text-slate-900 text-sm">
-              {isNormalizedFreq ? `${params.occupied_bandwidth || 'N/A'}` : formatFreq(params.occupied_bandwidth)}
+              {params.bandwidth_hz !== null ? `${params.bandwidth_hz.toLocaleString()} Hz` : 'Not available'}
             </span>
+            {params.bandwidth_hz === null && params.bandwidth_normalized !== null && (
+              <span className="block text-[10px] text-slate-500 mt-0.5">Normalized: {params.bandwidth_normalized}</span>
+            )}
+            {params.bandwidth_hz !== null && <span className="block text-[10px] text-slate-400 mt-0.5">Source: Estimated</span>}
           </div>
 
           <div>
             <span className="text-slate-400 font-sans block font-medium">Data Rate</span>
             <span className="font-bold text-slate-900 text-sm">
-              {cls.cw_detected || String(cls.modulation || "").toUpperCase().includes("CW") ? "N/A" : (params.data_rate !== undefined ? `${params.data_rate} Mbps` : 'N/A')}
+              {params.data_rate_bps !== null && params.data_rate_bps !== undefined ? `${params.data_rate_bps.toLocaleString()} bps` : 'Not available'}
             </span>
+            {params.data_rate_bps !== null && params.data_rate_bps !== undefined && (
+              <span className="block text-[10px] text-slate-400 mt-0.5">Source: Calculated</span>
+            )}
           </div>
 
           <div>
             <span className="text-slate-400 font-sans block font-medium">SNR</span>
             <span className="font-bold text-blue-600 text-sm">
-              {params.snr_display || (params.snr_db !== undefined ? `${params.snr_db} dB` : 'N/A')}
+              {params.snr_db !== null && params.snr_db !== undefined ? `${params.snr_db.toFixed(1)} dB` : 'Not available'}
             </span>
+            {params.snr_db !== null && params.snr_db !== undefined && <span className="block text-[10px] text-slate-400 mt-0.5">Source: Estimated</span>}
           </div>
 
           <div>

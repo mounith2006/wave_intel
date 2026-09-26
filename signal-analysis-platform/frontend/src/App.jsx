@@ -11,6 +11,8 @@ import { UploadSignal } from './pages/UploadSignal';
 import { AnalyzeSignal } from './pages/AnalyzeSignal';
 import { DecodeSignal } from './pages/DecodeSignal';
 import { BitstreamAnalysis } from './pages/BitstreamAnalysis';
+import { MLEvaluation } from './pages/MLEvaluation';
+import { ParameterValidation } from './pages/ParameterValidation';
 import { Reports } from './pages/Reports';
 
 export default function App() {
@@ -30,6 +32,8 @@ export default function App() {
                 <Route path="/analyze" element={<AnalyzeSignal />} />
                 <Route path="/decode" element={<DecodeSignal />} />
                 <Route path="/bitstream" element={<BitstreamAnalysis />} />
+                <Route path="/ml-evaluation" element={<MLEvaluation />} />
+                <Route path="/param-validation" element={<ParameterValidation />} />
                 <Route path="/reports" element={<Reports />} />
               </Routes>
             </main>

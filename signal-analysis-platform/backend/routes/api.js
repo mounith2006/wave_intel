@@ -251,4 +251,30 @@ router.get('/report/:id', async (req, res) => {
   }
 });
 
+// 11. GET /api/evaluation/ml
+router.get('/evaluation/ml', async (req, res) => {
+  try {
+    const pyRes = await axios.get(`${PYTHON_ENGINE_URL}/api/evaluation/ml`);
+    res.json(pyRes.data);
+  } catch (err) {
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({ error: 'ML evaluation data not found' });
+    }
+    res.status(500).json({ error: 'Failed to fetch ML evaluation' });
+  }
+});
+
+// 12. GET /api/evaluation/parameters
+router.get('/evaluation/parameters', async (req, res) => {
+  try {
+    const pyRes = await axios.get(`${PYTHON_ENGINE_URL}/api/evaluation/parameters`);
+    res.json(pyRes.data);
+  } catch (err) {
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({ error: 'Parameter evaluation data not found' });
+    }
+    res.status(500).json({ error: 'Failed to fetch Parameter evaluation' });
+  }
+});
+
 module.exports = router;

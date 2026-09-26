@@ -69,5 +69,15 @@ export const api = {
 
   getReportUrl: (id, format = 'json') => {
     return `${API_BASE_URL}/report/${id}?format=${format}`;
+  },
+
+  getMLEvaluation: async () => {
+    const res = await axios.get(`${API_BASE_URL}/evaluation/ml`);
+    return res.data;
+  },
+
+  getParamEvaluation: async () => {
+    const res = await axios.get(`${API_BASE_URL}/evaluation/parameters`);
+    return res.data;
   }
 };
