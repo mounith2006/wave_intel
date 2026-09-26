@@ -1,7 +1,10 @@
 import os
 import numpy as np
 import scipy.io.wavfile as wavfile
-import soundfile as sf
+try:
+    import soundfile as sf
+except ImportError:
+    sf = None
 
 class SignalLoadError(Exception):
     def __init__(self, message, stage="iq_validation"):
@@ -28,6 +31,8 @@ def load_signal_file(file_path, default_fs=48000):
     if ext == ".wav":
         detected_format = "wav_audio"
         try:
+            if sf is None:
+                raise ImportError("soundfile not installed, using scipy fallback")
             data, fs = sf.read(file_path)
             # If stereo, treat channel 0 as I and channel 1 as Q, or merge
             if data.ndim == 2:

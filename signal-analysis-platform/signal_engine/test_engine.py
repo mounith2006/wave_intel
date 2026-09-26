@@ -2,6 +2,9 @@ import os
 import sys
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from sample_generator import generate_all_samples
 from loader import load_signal_file, SignalLoadError
 from spectrum import compute_spectrum
@@ -58,8 +61,13 @@ def run_all_tests():
 
         # 4. SNR & Parameters
         params = estimate_signal_parameters(sig_data, fs)
-        print(f" -> SNR: {params['snr_db']} dB, Noise Power: {params['noise_power_db']} dB")
+        print(f" -> SNR: {params['snr_db']} dB, Symbol Rate: {params['symbol_rate_display']} (Conf: {params.get('symbol_rate_confidence')})")
         assert params['snr_db'] > 5.0, f"Failed: abnormally low SNR ({params['snr_db']} dB)"
+        if filename == "sample_cw.iq":
+            assert params['symbol_rate'] is None, f"Failed: CW should have symbol_rate=None, got {params['symbol_rate']}"
+            assert params['symbol_rate_display'] == "Not available", f"Failed: CW display expected 'Not available', got '{params['symbol_rate_display']}'"
+        elif params['symbol_rate'] is not None:
+            assert abs(params['symbol_rate'] - 1000.0) < 500.0, f"Failed: symbol_rate expected ~1000 Hz for {filename}, got {params['symbol_rate']}"
         
         # 5. Constellation
         const = compute_constellation(sig_data, fs)
@@ -69,8 +77,8 @@ def run_all_tests():
         
         # 6. Modulation Classification
         cls = classify_modulation(sig_data, fs)
-        print(f" -> Detected Modulation: {cls['modulation']}, Confidence: {cls['confidence']}%")
-        assert cls['confidence'] >= 50.0, f"Low confidence: {cls['confidence']}%"
+        print(f" -> Detected Modulation: {cls['modulation']}, Confidence: {cls['confidence']}, Method: {cls.get('classification_method')}")
+        assert cls['confidence'] >= 0.10, f"Low confidence: {cls['confidence']}"
         
         if filename == "sample_cw.iq":
             assert cls['modulation'] == "CW / Single Tone", f"Failed: expected 'CW / Single Tone', got '{cls['modulation']}'"

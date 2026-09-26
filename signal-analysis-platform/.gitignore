@@ -1,0 +1,51 @@
+# Dependencies & Virtual Environments
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment & Editor Files
+.env
+.env.local
+.env.*.local
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.log
+
+# Runtime Uploads Storage
+# Ignore user uploaded .wav, .iq, .raw files, but preserve gitkeep and demo sample signals
+uploads/*
+!uploads/.gitkeep
+!uploads/sample_bpsk.wav
+!uploads/sample_qpsk.wav
+!uploads/sample_fsk.wav
+!uploads/sample_qam16.wav
+!uploads/sample_iq.iq
+!uploads/sample_cw.iq
+
+# Runtime Generated Analysis Results Storage
+# Ignore generated analysis cache JSON files
+processed/*
+!processed/.gitkeep
+
+# Runtime Generated Download Reports Storage
+# Ignore generated PDF, CSV, and JSON download reports
+reports/*
+!reports/.gitkeep
+
+# Machine Learning Artifacts & Datasets
+datasets/
+models/*.joblib
+models/*.pkl
+!models/modulation_classes.json
+ml/results/

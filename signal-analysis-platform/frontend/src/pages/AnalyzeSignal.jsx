@@ -130,7 +130,14 @@ export const AnalyzeSignal = () => {
 
           <div>
             <span className="text-slate-400 font-sans block font-medium">Modulation</span>
-            <span className="font-bold text-emerald-600 font-sans text-sm">{cls.modulation || 'Unknown'}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-emerald-600 font-sans text-sm">{cls.modulation || 'Unknown'}</span>
+              {cls.classification_method && (
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${cls.classification_method === 'ML' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-amber-100 text-amber-700 border border-amber-200'}`}>
+                  {cls.classification_method}
+                </span>
+              )}
+            </div>
           </div>
 
           <div>
@@ -145,7 +152,9 @@ export const AnalyzeSignal = () => {
           <div>
             <span className="text-slate-400 font-sans block font-medium">Symbol Rate</span>
             <span className="font-bold text-slate-900 text-sm">
-              {cls.cw_detected || "CW" in String(cls.modulation || "").toUpperCase() ? "N/A" : (params.symbol_rate !== undefined ? `${params.symbol_rate} kSym/s` : '1.0 kSym/s')}
+              {cls.cw_detected || String(cls.modulation || "").toUpperCase().includes("CW")
+                ? "Not available"
+                : (params.symbol_rate_display || (params.symbol_rate !== null && params.symbol_rate !== undefined ? `${params.symbol_rate} Sym/s` : 'Not available'))}
             </span>
           </div>
 
@@ -160,7 +169,7 @@ export const AnalyzeSignal = () => {
           <div>
             <span className="text-slate-400 font-sans block font-medium">Data Rate</span>
             <span className="font-bold text-slate-900 text-sm">
-              {cls.cw_detected || "CW" in String(cls.modulation || "").toUpperCase() ? "N/A" : (params.data_rate !== undefined ? `${params.data_rate} Mbps` : 'N/A')}
+              {cls.cw_detected || String(cls.modulation || "").toUpperCase().includes("CW") ? "N/A" : (params.data_rate !== undefined ? `${params.data_rate} Mbps` : 'N/A')}
             </span>
           </div>
 
@@ -174,7 +183,7 @@ export const AnalyzeSignal = () => {
           <div>
             <span className="text-slate-400 font-sans block font-medium">Confidence</span>
             <span className="font-bold text-emerald-600 font-sans text-sm">
-              {cls.confidence !== undefined ? `${cls.confidence}%` : 'N/A'}
+              {cls.confidence !== undefined ? (cls.confidence <= 1.0 ? `${(cls.confidence * 100).toFixed(1)}%` : `${cls.confidence}%`) : 'N/A'}
             </span>
           </div>
         </div>
@@ -434,7 +443,7 @@ export const AnalyzeSignal = () => {
           </h4>
           <p className="text-xs text-slate-600 font-medium">
             Detected Modulation: <span className="font-bold text-slate-900">{cls.modulation || 'Unknown'}</span>{' '}
-            {cls.confidence !== undefined ? `(${cls.confidence}% confidence)` : ''}
+            {cls.confidence !== undefined ? `(${cls.confidence <= 1.0 ? (cls.confidence * 100).toFixed(1) : cls.confidence}% confidence via ${cls.classification_method || 'ML'})` : ''}
           </p>
           <p className="text-xs text-slate-500">
             {cls.explanation ||

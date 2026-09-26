@@ -177,7 +177,9 @@ export const Reports = () => {
             <div className="flex justify-between">
               <span className="text-slate-500 font-sans">Symbol Rate</span>
               <span className="text-slate-800">
-                {isCw ? 'N/A' : (params.symbol_rate !== undefined ? `${params.symbol_rate} kSym/s` : 'N/A')}
+                {isCw
+                  ? 'Not available'
+                  : (params.symbol_rate_display || (params.symbol_rate !== null && params.symbol_rate !== undefined ? `${params.symbol_rate} Sym/s` : 'Not available'))}
               </span>
             </div>
             <div className="flex justify-between">

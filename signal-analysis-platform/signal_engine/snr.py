@@ -1,5 +1,9 @@
 import numpy as np
 from scipy import signal as dsp_signal
+try:
+    from .symbol_rate import estimate_symbol_rate
+except ImportError:
+    from symbol_rate import estimate_symbol_rate
 
 def estimate_signal_parameters(signal_data, fs):
     """
@@ -10,6 +14,7 @@ def estimate_signal_parameters(signal_data, fs):
     - Peak Frequency (Hz or normalized)
     - Center Frequency (Hz or normalized)
     - Occupied Bandwidth (Hz or normalized)
+    - Symbol Rate ($R_s$, kSym/s, display string, confidence, SPS)
     """
     n_samples = len(signal_data)
     if n_samples == 0:
@@ -20,6 +25,11 @@ def estimate_signal_parameters(signal_data, fs):
             "peak_frequency": 0.0,
             "center_frequency": 0.0,
             "occupied_bandwidth": 0.0,
+            "symbol_rate": None,
+            "symbol_rate_ksym_s": None,
+            "symbol_rate_display": "Not available",
+            "symbol_rate_confidence": 0.0,
+            "sps": None,
             "is_normalized_freq": fs is None or fs <= 0
         }
 
@@ -82,6 +92,9 @@ def estimate_signal_parameters(signal_data, fs):
     idx_u = min(max(0, np.searchsorted(cum_power, 0.995)), len(freqs) - 1)
     bandwidth = abs(float(freqs[idx_u] - freqs[idx_l]))
 
+    # DSP Symbol Rate Estimation
+    sym_res = estimate_symbol_rate(sig_bounded, fs)
+
     freq_decimals = 4 if not has_valid_fs else 2
 
     return {
@@ -94,7 +107,13 @@ def estimate_signal_parameters(signal_data, fs):
         "peak_frequency": round(peak_freq, freq_decimals),
         "center_frequency": round(center_freq, freq_decimals),
         "occupied_bandwidth": round(bandwidth, freq_decimals),
+        "symbol_rate": sym_res["symbol_rate"],
+        "symbol_rate_ksym_s": sym_res["symbol_rate_ksym_s"],
+        "symbol_rate_display": sym_res["symbol_rate_display"],
+        "symbol_rate_confidence": sym_res["confidence"],
+        "sps": sym_res["sps"],
         "is_normalized_freq": not has_valid_fs
     }
+
 
 

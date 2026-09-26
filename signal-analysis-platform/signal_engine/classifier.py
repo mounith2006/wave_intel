@@ -143,14 +143,14 @@ def extract_signal_features(signal_data, fs):
         "peak_to_median_psd": round(peak_to_median_psd, 2)
     }
 
-def classify_modulation(signal_data, fs):
+def classify_modulation_heuristic(signal_data, fs):
     """
-    Modulation Classifier using statistical DSP features, PSD peak analysis, phase consistency, and cumulants.
-    Accurately classifies CW / Single Tone, synthetic BPSK, QPSK, 2FSK, 4FSK, 16QAM, 64QAM signals.
+    Fallback Modulation Classifier using statistical DSP features & heuristics.
+    Used when ML model is not available or fails.
     """
     feats = extract_signal_features(signal_data, fs)
     if not feats:
-        return {"modulation": "Unknown / Low Confidence", "confidence": 0.0, "features": {}}
+        return {"modulation": "Unknown / Low Confidence", "confidence": 0.0, "classification_method": "HEURISTIC", "features": {}}
 
     gamma_max = feats["gamma_max"]
     axis_ratio = feats["axis_ratio"]
@@ -159,19 +159,19 @@ def classify_modulation(signal_data, fs):
     is_fsk = feats["is_fsk"]
     d_phi_std = feats.get("d_phi_std", 1.0)
     norm_freq = feats.get("norm_freq", 0.0)
-    peak_to_median_psd = feats.get("peak_to_median_psd", 0.0)
 
-    # 0. Check CW / Single Tone BEFORE PSK/QAM classification
     is_cw = False
     if gamma_max < 0.05 and axis_ratio < 2.5 and d_phi_std < 0.15 and not is_fsk:
         is_cw = True
 
     if is_cw:
         detected_mod = "CW / Single Tone"
-        confidence = 99.5
+        confidence = 0.995
         return {
             "modulation": detected_mod,
-            "confidence": round(float(confidence), 1),
+            "confidence": round(float(confidence), 4),
+            "classification_method": "HEURISTIC",
+            "model_name": "Statistical Heuristic Rules",
             "features": feats,
             "signal_type": "CW / Single Tone",
             "carrier_detection": True,
@@ -180,34 +180,71 @@ def classify_modulation(signal_data, fs):
             "explanation": f"Unmodulated Continuous Wave (CW) carrier detected at normalized frequency {norm_freq:+.4f} with constant envelope and high phase coherence."
         }
 
-    # 1. Check FSK
     if is_fsk:
         detected_mod = "2FSK"
-        confidence = 98.2
-
-    # 2. Check QAM Family (multi-level envelope variance)
+        confidence = 0.982
     elif gamma_max > 0.08:
         if gamma_max < 0.25:
             detected_mod = "16QAM"
-            confidence = min(98.0, 86.0 + gamma_max * 50)
+            confidence = min(0.98, 0.86 + gamma_max * 0.5)
         else:
             detected_mod = "64QAM"
-            confidence = 92.0
-
-    # 3. Check PSK Family (constant envelope: gamma_max <= 0.08)
+            confidence = 0.920
     else:
         if axis_ratio > 3.0 or norm_c40 > 1.2:
             detected_mod = "BPSK"
-            confidence = min(98.5, 88.0 + min(10.0, axis_ratio * 0.1))
+            confidence = min(0.985, 0.880 + min(0.10, axis_ratio * 0.01))
         else:
             detected_mod = "QPSK"
-            confidence = min(98.5, 90.0 + norm_c42 * 4)
+            confidence = min(0.985, 0.900 + norm_c42 * 0.04)
 
     return {
         "modulation": detected_mod,
-        "confidence": round(float(confidence), 1),
+        "confidence": round(float(confidence), 4),
+        "classification_method": "HEURISTIC",
+        "model_name": "Statistical Heuristic Rules",
         "features": feats
     }
+
+def classify_modulation(signal_data, fs):
+    """
+    Main Modulation Classifier integration point.
+    If trained RadioML model exists, uses ML prediction; otherwise safely falls back to heuristic rules.
+    """
+    # Extract DSP features for full UI and DSP parameter pipeline compatibility
+    dsp_feats = extract_signal_features(signal_data, fs)
+
+    # CW / Single Tone special check
+    if dsp_feats and dsp_feats.get("gamma_max", 1.0) < 0.05 and dsp_feats.get("axis_ratio", 1.0) < 2.5 and dsp_feats.get("d_phi_std", 1.0) < 0.15 and not dsp_feats.get("is_fsk"):
+        norm_freq = dsp_feats.get("norm_freq", 0.0)
+        return {
+            "modulation": "CW / Single Tone",
+            "confidence": 0.995,
+            "classification_method": "HEURISTIC",
+            "model_name": "Statistical Heuristic Rules",
+            "features": dsp_feats,
+            "signal_type": "CW / Single Tone",
+            "carrier_detection": True,
+            "normalized_frequency": round(float(norm_freq), 4),
+            "cw_detected": True,
+            "explanation": f"Unmodulated Continuous Wave (CW) carrier detected at normalized frequency {norm_freq:+.4f}."
+        }
+
+    try:
+        from ml.predict import predict_modulation
+        ml_res = predict_modulation(signal_data, sample_rate=fs)
+        if ml_res and ml_res.get("classification_method") == "ML":
+            if dsp_feats:
+                merged_feats = {**dsp_feats, **ml_res.get("features", {})}
+                ml_res["features"] = merged_feats
+            return ml_res
+    except Exception as e:
+        import sys
+        print(f"[Classifier Integration Error] ML prediction execution failed: {e}. Falling back to heuristic DSP classifier.", file=sys.stderr, flush=True)
+
+    # Fallback to Heuristic Classifier if ML model is absent or prediction fails
+    return classify_modulation_heuristic(signal_data, fs)
+
 
 
 
