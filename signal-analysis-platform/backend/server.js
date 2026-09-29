@@ -6,21 +6,46 @@ const path = require('path');
 const axios = require('axios');
 const apiRoutes = require('./routes/api');
 
+const PORT = process.env.PORT || 5000;
+const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || 'http://127.0.0.1:8000';
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  FRONTEND_URL
+].filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
+  credentials: true
+};
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: FRONTEND_URL || '*',
+    methods: ['GET', 'POST'],
+    credentials: true
   }
 });
 
-const PORT = process.env.PORT || 5000;
-const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || 'http://127.0.0.1:8000';
-
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Health Check Endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', service: 'WaveIntel Node Backend' });
+});
 
 // Register API routes
 app.use('/api', apiRoutes);
@@ -150,9 +175,9 @@ io.on('connection', (socket) => {
 });
 
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`==================================================`);
-  console.log(`Node.js Backend Server running on http://localhost:${PORT}`);
+  console.log(`Node.js Backend Server running on 0.0.0.0:${PORT}`);
   console.log(`Connected to Python Signal Engine at: ${PYTHON_ENGINE_URL}`);
   console.log(`==================================================`);
 });

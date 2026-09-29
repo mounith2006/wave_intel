@@ -86,8 +86,9 @@ class CorrelateRequest(BaseModel):
     sync_pattern: Optional[str] = "1010101010110011"
 
 @app.get("/")
+@app.get("/health")
 def health_check():
-    return {"status": "online", "engine": "Python DSP & ML Signal Processing Engine"}
+    return {"status": "ok", "engine": "Python DSP & ML Signal Processing Engine"}
 
 def resolve_file(file_path_str: str) -> str:
     """Helper to resolve file path in uploads if given relative name or preset."""
@@ -347,10 +348,10 @@ def download_report(file_name: str, format: str = Query("json")):
 
 if __name__ == "__main__":
     import uvicorn
-
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "signal_engine.main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True
+        port=port,
+        reload=False
     )

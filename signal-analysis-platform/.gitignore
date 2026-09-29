@@ -32,6 +32,7 @@ uploads/*
 !uploads/sample_qam16.wav
 !uploads/sample_iq.iq
 !uploads/sample_cw.iq
+!uploads/cw_signal.iq
 
 # Runtime Generated Analysis Results Storage
 # Ignore generated analysis cache JSON files
