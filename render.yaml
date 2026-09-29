@@ -6,14 +6,13 @@ services:
     rootDir: signal-analysis-platform/backend
     buildCommand: npm install
     startCommand: node server.js
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_ENGINE_URL
-        fromService:
-          type: web
-          name: waveintel-dsp
-          property: url
+        sync: false
+
       - key: FRONTEND_URL
-        value: https://your-app.vercel.app
+        sync: false
 
   - type: web
     name: waveintel-dsp
@@ -22,3 +21,4 @@ services:
     rootDir: signal-analysis-platform
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn signal_engine.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
